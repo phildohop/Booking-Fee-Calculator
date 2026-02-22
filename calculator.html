@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Fee Refund Calculator</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7f9;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #34495e;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s, background-color 0.3s;
+    }
+    input:focus {
+      border-color: #3498db;
+      outline: none;
+      background-color: #ecf6fc;
+    }
+    .invalid {
+      border: 2px solid #e74c3c;
+      background-color: #fdecea;
+    }
+    .inline-error {
+      color: #e74c3c;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+    .buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      background: #3498db;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    button.reset {
+      background: #95a5a6;
+    }
+    button.reset:hover {
+      background: #7f8c8d;
+    }
+    h3 {
+      margin-top: 25px;
+      color: #2c3e50;
+    }
+    #result {
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 10px;
+      min-height: 30px;
+    }
+    .reminder {
+      color: #34495e;
+      font-weight: bold;
+      margin-top: 20px;
+      background: #f9f9d1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #f1c40f;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Booking Fee Refund Calculator</h2>
+    
+    <label>Booking Fee Amount:</label>
+    <input type="text" id="bookingFee"><span id="errorBookingFee" class="inline-error"></span>
+
+    <label>Flight 1 Amount:</label>
+    <input type="text" id="flight1"><span id="errorFlight1" class="inline-error"></span>
+
+    <label>Flight 2 Amount:</label>
+    <input type="text" id="flight2"><span id="errorFlight2" class="inline-error"></span>
+
+    <label>Flight 3 Amount:</label>
+    <input type="text" id="flight3"><span id="errorFlight3" class="inline-error"></span>
+
+    <label>Flight 4 Amount:</label>
+    <input type="text" id="flight4"><span id="errorFlight4" class="inline-error"></span>
+
+    <div class="buttons">
+      <button onclick="calculateRefund()">Calculate Refunds</button>
+      <button class="reset" onclick="resetForm()">Reset</button>
+    </div>
+    
+    <h3>Refundable amount each flight:</h3>
+    <div id="result"></div>
+
+    <p class="reminder">⚠ Important: Please make sure all amounts are entered in the same currency, otherwise the refundable amount will be incorrect.</p>
+  </div>
+
+  <script>
+    function calculateRefund() {
+      let fields = [
+        {input: document.getElementById("bookingFee"), error: document.getElementById("errorBookingFee")},
+        {input: document.getElementById("flight1"), error: document.getElementById("errorFlight1")},
+        {input: document.getElementById("flight2"), error: document.getElementById("errorFlight2")},
+        {input: document.getElementById("flight3"), error: document.getElementById("errorFlight3")},
+        {input: document.getElementById("flight4"), error: document.getElementById("errorFlight4")}
+      ];
+
+      let inputs = fields.map(f => f.input.value.trim());
+      let validNumber = /^(\d+(\.\d+)?)?$/;
+
+      fields.forEach(f => {
+        f.input.classList.remove("invalid");
+        f.error.textContent = "";
+      });
+
+      for (let i = 0; i < inputs.length; i++) {
+        if (inputs[i] !== "" && !validNumber.test(inputs[i])) {
+          fields[i].input.classList.add("invalid");
+          fields[i].error.textContent = "Invalid number!";
+          alert("Error: Amounts must be numbers only (no letters).");
+          document.getElementById("result").innerHTML = "<span class='error'>Error: Amounts must be numbers only (no letters).</span>";
+          return;
+        }
+      }
+
+      let numbers = inputs.map(val => val === "" ? 0 : parseFloat(val));
+      let B = numbers[0], F1 = numbers[1], F2 = numbers[2], F3 = numbers[3], F4 = numbers[4];
+      let totalFlights = F1 + F2 + F3 + F4;
+
+      if (totalFlights === 0) {
+        alert("Error: Total flight amount cannot be zero.");
+        document.getElementById("result").innerHTML = "<span class='error'>Error: Total flight amount cannot be zero.</span>";
+        return;
+      }
+
+      let refunds = [];
+      [F1, F2, F3, F4].forEach((Fi, index) => {
+        if (Fi > 0) {
+          let refund = (B * Fi / totalFlights).toFixed(2);
+          refunds.push("Flight " + (index+1) + ": " + refund);
+        }
+      });
+
+      document.getElementById("result").innerHTML = refunds.join("<br>");
+    }
+
+    function resetForm() {
+      let fields = [
+        {input: document.getElementById("bookingFee"), error: document.getElementById("errorBookingFee")},
+        {input: document.getElementById("flight1"), error: document.getElementById("errorFlight1")},
+        {input: document.getElementById("flight2"), error: document.getElementById("errorFlight2")},
+        {input: document.getElementById("flight3"), error: document.getElementById("errorFlight3")},
+        {input: document.getElementById("flight4"), error: document.getElementById("errorFlight4")}
+      ];
+
+      fields.forEach(f => {
+        f.input.value = "";
+        f.input.classList.remove("invalid");
+        f.error.textContent = "";
+      });
+
+      document.getElementById("result").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
